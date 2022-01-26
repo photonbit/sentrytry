@@ -1,0 +1,29 @@
+name: Trytiole
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  sentry_release:
+    name: Sentry release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v2
+      - name: Sentry Release 
+        run: |
+            curl -sL https://sentry.io/get-cli/ | bash
+            # Create new Sentry release
+            sentry-cli releases new -p $SENTRY_PROJECT $SENTRY_RELEASE
+            sentry-cli releases set-commits --auto $SENTRY_RELEASE
+            sentry-cli releases finalize $SENTRY_RELEASE
+            # Create new deploy for this Sentry release
+            sentry-cli releases deploys $SENTRY_RELEASE new -e $SENTRY_ENVIRONMENT
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: 'daniel-moreno-medina'
+          SENTRY_PROJECT: 'sentrytry'
+          SENTRY_ENVIRONMENT: 'staging'
+          SENTRY_RELEASE: ${{ github.sha }}
