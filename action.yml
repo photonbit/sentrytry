@@ -1,12 +1,34 @@
 name: 'Release'
 description: 'Publish releases'
+inputs:
+  sentry_project:
+    description: 'Name of the project in Sentry'
+    required: true
+    default: 'Foo'
+  sentry_release:
+    description: 'Release version for Sentry'
+    required: true
+    default: 'Bar'
+  sentry_environment:
+    description: 'Release environment'
+    required: true
+    default: 'development'
+  code_dir:
+    description: 'The directory where the code was fetched'
+    required: false
+    default: '.'
+  repo:
+    description: 'The repo as configured in Sentry'
+    required: true
+  github_token:
+    description: 'The GitHub token, might not be necessary'
+    required: true
 runs:
   using: "composite"
   steps:
     - name: Sentry Release 
       run: |
-          cd ${{ inputs.code_dir }}
-                    curl -sL https://sentry.io/get-cli/ | bash
+          curl -sL https://sentry.io/get-cli/ | bash
           # Create new Sentry release
           sentry-cli releases new -p $SENTRY_PROJECT $SENTRY_RELEASE
           sentry-cli releases set-commits --auto $SENTRY_RELEASE
@@ -14,9 +36,7 @@ runs:
           # Create new deploy for this Sentry release
           sentry-cli releases deploys $SENTRY_RELEASE new -e $SENTRY_ENVIRONMENT
       env:
-          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
           SENTRY_ORG: 'daniel-moreno-medina'
           SENTRY_PROJECT: 'sentrytry'
           SENTRY_ENVIRONMENT: 'staging'
-          SENTRY_RELEASE: ${{ github.sha }}
       shell: bash
