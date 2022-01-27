@@ -13,4 +13,4 @@ jobs:
       - name: Check out Git repository
         uses: actions/checkout@v2
       - name: Sentry Release 
-        uses: photonbit/sentrytry
+        uses: photonbit/sentrytry@main
